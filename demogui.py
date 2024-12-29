@@ -11,8 +11,6 @@ class MotionModelApp(QWidget):
         super().__init__()
         self.setWindowTitle("First Order Model GUI")
         self.setGeometry(100, 100, 500, 400)
-
-        # Layout
         layout = QVBoxLayout()
 
         # Input Source Image
@@ -33,7 +31,7 @@ class MotionModelApp(QWidget):
         self.crf_label = QLabel("CRF Value (Quality):")
         layout.addWidget(self.crf_label)
         self.crf_spinbox = QSpinBox()
-        self.crf_spinbox.setRange(0, 51)  # FFmpeg CRF range
+        self.crf_spinbox.setRange(0, 51) 
         self.crf_spinbox.setValue(18)
         layout.addWidget(self.crf_spinbox)
 
@@ -41,7 +39,7 @@ class MotionModelApp(QWidget):
         self.model_label = QLabel("Select Model:")
         layout.addWidget(self.model_label)
         self.model_dropdown = QComboBox()
-        self.model_dropdown.addItems(["vox-256", "vox-adv-256"])
+        self.model_dropdown.addItems(["vox-256", "vox-adv-256"]) # These are config files for voxceleb 256
         layout.addWidget(self.model_dropdown)
 
         # Relative Flag Checkbox
@@ -67,13 +65,13 @@ class MotionModelApp(QWidget):
 
         # Finalize Layout
         self.setLayout(layout)
-
+    # Choose Image from Local Files
     def select_source_image(self):
         fname, _ = QFileDialog.getOpenFileName(self, "Select Source Image", "", "Images (*.png *.jpg *.jpeg)")
         if fname:
             self.source_label.setText(f"Source Image: {fname}")
             self.source_image = fname
-
+    # Choose Driving Video from local files
     def select_driving_video(self):
         fname, _ = QFileDialog.getOpenFileName(self, "Select Driving Video", "", "Videos (*.mp4 *.mov)")
         if fname:
@@ -110,7 +108,7 @@ class MotionModelApp(QWidget):
                 return
 
             # Parse crop details
-            crop_ffmpeg_cmd = crop_output[0]  # Assuming first line is the FFmpeg command
+            crop_ffmpeg_cmd = crop_output[0]  
             parts = crop_ffmpeg_cmd.split()
             ss = parts[parts.index('-ss') + 1]
             t = parts[parts.index('-t') + 1]
@@ -122,20 +120,20 @@ class MotionModelApp(QWidget):
             self.progress_bar.setValue(30)
             self.run_command(crop_apply_command)
 
-            # Step 3: Run the model
+            # Step 3: Run the model: Implements the commands
             config_file = f"config/{model}.yaml"
             checkpoint = "checkpoints/vox-cpk.pth.tar"
             demo_command = f"python demo.py --config \"{config_file}\" --driving_video \"{cropped_video}\" --source_image \"{source_image}\" --checkpoint \"{checkpoint}\" {relative_flag} --adapt_scale --cpu --result_video \"{output_file}\""
             self.progress_bar.setValue(60)
             self.run_command(demo_command)
 
-            # Step 4: Notify Success
+            # Step 4: Notify Success:  This part is not properly functioning. 
             self.progress_bar.setValue(100)
             QMessageBox.information(self, "Success", f"Video saved as {output_file}")
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
-        
+    # Split and extract suggested FFMPEG crop command
     def parse_crop_command(self, command):
         try:
             parts = command.split(" ")
@@ -143,7 +141,7 @@ class MotionModelApp(QWidget):
             return crop_params
         except Exception:
             return None
-
+    
     def run_command(self, command):
         process = Popen(command, shell=True)
         process.wait()
